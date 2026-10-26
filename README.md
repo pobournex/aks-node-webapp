@@ -19,6 +19,7 @@ A Node.js Express web server containerized with Docker and deployed to **Azure K
 - [Repository Structure](#repository-structure)
 - [CI/CD Workflow](#cicd-workflow)
 - [Deployment Verification](#deployment-verification)
+- [Project Visuals](#project-visuals)
 - [Local Cluster Verification](#local-cluster-verification)
 - [Running Locally](#running-locally)
 - [Key Learnings & Troubleshooting](#key-learnings--troubleshooting)
@@ -131,6 +132,9 @@ aks-node-webapp/
 │   └── service.yaml         # LoadBalancer Service
 ├── Dockerfile               # Container image definition
 ├── azure-pipelines.yml      # Multi-stage CI/CD pipeline
+├── project visuals/         # Deployment screenshots used in this README
+│   ├── 1.png                # Terminal: pods + LoadBalancer external IP
+│   └── 2.png                # Browser: live app at 52.147.211.45
 ├── package.json
 ├── app.js                   # Express application entry point (port 8080)
 └── README.md
@@ -184,6 +188,22 @@ After a successful pipeline run:
   **Hello from Azure Kubernetes Service! 🚀**
 
 > The external IP is assigned by Azure and may change if the service is recreated.
+
+---
+
+## Project Visuals
+
+### 1. Cluster verification: running pods and LoadBalancer external IP
+
+`kubectl` output showing the 2 replica pods in `Running` state and the `sample-app-service` LoadBalancer with external IP `52.147.211.45`.
+
+![Terminal verification of running pods and LoadBalancer external IP](project%20visuals/1.png)
+
+### 2. Live application in the browser
+
+The app served at `http://52.147.211.45`, returning "Hello from Azure Kubernetes Service! 🚀".
+
+![Live browser view of the application at 52.147.211.45](project%20visuals/2.png)
 
 ---
 
