@@ -52,8 +52,8 @@ stages:
         kubernetesCluster: '$(aksClusterName)'
         namespace: 'default'
         manifests: |
-          $(System.DefaultWorkingDirectory)/k8s/deployment.yaml
-          $(System.DefaultWorkingDirectory)/k8s/service.yaml
+          $(System.DefaultWorkingDirectory)/K8s/deployment.yaml
+          $(System.DefaultWorkingDirectory)/K8s/service.yaml
         imagePullSecrets: |
           pobouracr123-auth # Optional if ACR-AKS attachment is active, but safe to include
         containers: |
