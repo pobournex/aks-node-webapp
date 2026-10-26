@@ -140,7 +140,7 @@ aks-node-webapp/
 │   ├── 04-live-app-browser.png
 │   ├── 05-acr-service-connection.png
 │   ├── 06-arm-service-connection.png
-│   └── walkthrough/         # Step-by-step build screenshots (26 images)
+│   └── walkthrough/         # Step-by-step build screenshots (20 images)
 ├── package.json
 ├── app.js                   # Express application entry point (port 8080)
 └── README.md
@@ -229,10 +229,7 @@ The app served at `http://52.147.211.45`, returning "Hello from Azure Kubernetes
 
 ## Build Walkthrough
 
-The full build, step by step, from the first CLI commands to the live app. Account identifiers (subscription ID, emails, local username) are redacted.
-
-<details>
-<summary>Show all 32 steps</summary>
+The build, step by step, from the first CLI commands to the failing and fixed pipeline runs. The successful run, `kubectl` output, LoadBalancer and live app are under [Project Visuals](#project-visuals). Account identifiers (subscription ID, emails, local username) are redacted.
 
 **1. Project files in VS Code: `K8s/` manifests, `app.js`, `Dockerfile`, `package.json`.**
 
@@ -282,87 +279,37 @@ The full build, step by step, from the first CLI commands to the live app. Accou
 
 ![Project Settings, where service connections are managed.](project%20visuals/walkthrough/12-project-settings.png)
 
-**13. Service connections: none created yet.**
+**13. Service connections: none created yet. The filled-in connection forms are under [Troubleshooting](#3-missing-azure-devops-service-connections).**
 
-![Service connections: none created yet.](project%20visuals/walkthrough/13-service-connections-empty.png)
+![Service connections: none created yet. The filled-in connection forms are under [Troubleshooting](#3-missing-azure-devops-service-connections).](project%20visuals/walkthrough/13-service-connections-empty.png)
 
-**14. New service connection: choose a connection type.**
+**14. `acr-service-connection` created (Docker Registry, service principal).**
 
-![New service connection: choose a connection type.](project%20visuals/walkthrough/14-new-service-connection.png)
+![`acr-service-connection` created (Docker Registry, service principal).](project%20visuals/walkthrough/14-acr-connection-created.png)
 
-**15. Docker Registry connection form (registry type: Others).**
+**15. Run the pipeline manually from `main`.**
 
-![Docker Registry connection form (registry type: Others).](project%20visuals/walkthrough/15-docker-registry-others.png)
+![Run the pipeline manually from `main`.](project%20visuals/walkthrough/15-run-pipeline.png)
 
-**16. Docker Registry connection form (registry type: Azure Container Registry).**
+**16. Run #2 fails validation: the `lab-subscription` service connection is missing.**
 
-![Docker Registry connection form (registry type: Azure Container Registry).](project%20visuals/walkthrough/16-docker-registry-acr.png)
+![Run #2 fails validation: the `lab-subscription` service connection is missing.](project%20visuals/walkthrough/16-run2-failed.png)
 
-**17. ACR connection filled in: service principal auth, registry `pobouracr123`, named `acr-service-connection`.**
+**17. New service connection: Azure Resource Manager.**
 
-![ACR connection filled in: service principal auth, registry `pobouracr123`, named `acr-service-connection`.](project%20visuals/05-acr-service-connection.png)
+![New service connection: Azure Resource Manager.](project%20visuals/walkthrough/17-new-arm-connection.png)
 
-**18. `acr-service-connection` created (Docker Registry, service principal).**
+**18. Run #3: Build job succeeded, Deploy job queued.**
 
-![`acr-service-connection` created (Docker Registry, service principal).](project%20visuals/walkthrough/18-acr-connection-created.png)
+![Run #3: Build job succeeded, Deploy job queued.](project%20visuals/walkthrough/18-run3-jobs.png)
 
-**19. Run the pipeline manually from `main`.**
+**19. `azure-pipelines.yml` still referencing lowercase `k8s/` manifest paths before the fix.**
 
-![Run the pipeline manually from `main`.](project%20visuals/walkthrough/19-run-pipeline.png)
+![`azure-pipelines.yml` still referencing lowercase `k8s/` manifest paths before the fix.](project%20visuals/walkthrough/19-yaml-lowercase-k8s.png)
 
-**20. Run #2 fails validation: the `lab-subscription` service connection is missing.**
+**20. Run #5 log: commit `b1ffbc52` "Updated azure-pipelines.yml" (the `K8s/` casing fix) is included.**
 
-![Run #2 fails validation: the `lab-subscription` service connection is missing.](project%20visuals/walkthrough/20-run2-failed.png)
-
-**21. New service connection: Azure Resource Manager.**
-
-![New service connection: Azure Resource Manager.](project%20visuals/walkthrough/21-new-arm-connection.png)
-
-**22. Azure Resource Manager connection form before the name is set.**
-
-![Azure Resource Manager connection form before the name is set.](project%20visuals/walkthrough/22-arm-form-empty.png)
-
-**23. Azure Resource Manager connection scoped to `rg-k8s-demo`, named `lab-subscription`.**
-
-![Azure Resource Manager connection scoped to `rg-k8s-demo`, named `lab-subscription`.](project%20visuals/06-arm-service-connection.png)
-
-**24. Run #3 in progress: Build stage running, Deploy not started.**
-
-![Run #3 in progress: Build stage running, Deploy not started.](project%20visuals/walkthrough/24-run3-in-progress.png)
-
-**25. Run #3 jobs: Build job succeeded, Deploy job queued.**
-
-![Run #3 jobs: Build job succeeded, Deploy job queued.](project%20visuals/walkthrough/25-run3-jobs.png)
-
-**26. `azure-pipelines.yml` still referencing lowercase `k8s/` manifest paths before the fix.**
-
-![`azure-pipelines.yml` still referencing lowercase `k8s/` manifest paths before the fix.](project%20visuals/walkthrough/26-yaml-lowercase-k8s.png)
-
-**27. Run #5: Build and Deploy stages both succeed.**
-
-![Run #5: Build and Deploy stages both succeed.](project%20visuals/01-pipeline-run-success.png)
-
-**28. Run #5 log: commit `b1ffbc52` "Updated azure-pipelines.yml" (the `K8s/` casing fix) is included.**
-
-![Run #5 log: commit `b1ffbc52` "Updated azure-pipelines.yml" (the `K8s/` casing fix) is included.](project%20visuals/walkthrough/28-run5-log.png)
-
-**29. `kubectl get pods`: both replicas `Running`.**
-
-![`kubectl get pods`: both replicas `Running`.](project%20visuals/walkthrough/29-pods-running.png)
-
-**30. `az aks get-credentials` merges the cluster context, then both pods show `Running`.**
-
-![`az aks get-credentials` merges the cluster context, then both pods show `Running`.](project%20visuals/02-kubectl-get-pods.png)
-
-**31. `kubectl get services`: `sample-app-service` LoadBalancer with external IP `52.147.211.45`.**
-
-![`kubectl get services`: `sample-app-service` LoadBalancer with external IP `52.147.211.45`.](project%20visuals/03-kubectl-get-services.png)
-
-**32. The live app in the browser at `http://52.147.211.45`.**
-
-![The live app in the browser at `http://52.147.211.45`.](project%20visuals/04-live-app-browser.png)
-
-</details>
+![Run #5 log: commit `b1ffbc52` "Updated azure-pipelines.yml" (the `K8s/` casing fix) is included.](project%20visuals/walkthrough/20-run5-log.png)
 
 ---
 
