@@ -133,8 +133,12 @@ aks-node-webapp/
 ├── Dockerfile               # Container image definition
 ├── azure-pipelines.yml      # Multi-stage CI/CD pipeline
 ├── project visuals/         # Deployment screenshots used in this README
-│   ├── 1.png                # Terminal: pods + LoadBalancer external IP
-│   └── 2.png                # Browser: live app at 52.147.211.45
+│   ├── 01-pipeline-run-success.png
+│   ├── 02-kubectl-get-pods.png
+│   ├── 03-kubectl-get-services.png
+│   ├── 04-live-app-browser.png
+│   ├── 05-acr-service-connection.png
+│   └── 06-arm-service-connection.png
 ├── package.json
 ├── app.js                   # Express application entry point (port 8080)
 └── README.md
@@ -193,17 +197,31 @@ After a successful pipeline run:
 
 ## Project Visuals
 
-### 1. Cluster verification: running pods and LoadBalancer external IP
+> Account identifiers (subscription ID, emails, local username) are redacted in all screenshots.
 
-`kubectl` output showing the 2 replica pods in `Running` state and the `sample-app-service` LoadBalancer with external IP `52.147.211.45`.
+### 1. Pipeline run: Build and Deploy stages succeed
 
-![Terminal verification of running pods and LoadBalancer external IP](project%20visuals/1.png)
+Azure DevOps run `#20261026.5` with both stages green: **Build and Push Docker Image** (image pushed to ACR) and **Deploy to AKS**.
 
-### 2. Live application in the browser
+![Azure DevOps pipeline run with Build and Deploy stages succeeded](project%20visuals/01-pipeline-run-success.png)
+
+### 2. Cluster verification: 2 replica pods running
+
+`az aks get-credentials` merges the cluster context locally, then `kubectl get pods` shows both `sample-app-deployment` replicas `Running` (1/1 ready, 0 restarts).
+
+![Terminal showing az aks get-credentials and 2 running pods](project%20visuals/02-kubectl-get-pods.png)
+
+### 3. LoadBalancer service with external IP
+
+`sample-app-service` is a `LoadBalancer` exposing port 80 externally at `52.147.211.45`.
+
+![kubectl get services showing the LoadBalancer external IP](project%20visuals/03-kubectl-get-services.png)
+
+### 4. Live application in the browser
 
 The app served at `http://52.147.211.45`, returning "Hello from Azure Kubernetes Service! 🚀".
 
-![Live browser view of the application at 52.147.211.45](project%20visuals/2.png)
+![Live browser view of the application at 52.147.211.45](project%20visuals/04-live-app-browser.png)
 
 ---
 
@@ -300,6 +318,24 @@ az aks get-credentials --resource-group rg-k8s-demo --name myAKSCluster
 
 **Takeaway:** `az aks get-credentials` is the bridge between Azure and local `kubectl`. Verify with `kubectl config current-context`.
 
+### 3. Missing Azure DevOps service connections
+
+**Problem:** Early pipeline runs failed validation before any job started:
+- Run `#20261026.1`: the Docker task could not find the service connection `acr-service-connection`.
+- Run `#20261026.2`: the Kubernetes manifest task could not find the service connection `lab-subscription`.
+
+**Fix:** Create both connections under **Project Settings → Service connections** with names that exactly match the pipeline variables:
+
+1. A **Docker Registry** connection of type Azure Container Registry, pointing at `pobouracr123`, named `acr-service-connection`.
+
+   ![Creating the ACR service connection](project%20visuals/05-acr-service-connection.png)
+
+2. An **Azure Resource Manager** connection scoped to `rg-k8s-demo`, named `lab-subscription`.
+
+   ![Creating the Azure Resource Manager service connection](project%20visuals/06-arm-service-connection.png)
+
+**Takeaway:** The names in `azure-pipelines.yml` must match the service connection names exactly. The pipeline is validated before it runs, so a missing connection fails the run in under a second.
+
 ### Common issues
 
 | Symptom | Likely cause | Fix |
@@ -308,6 +344,7 @@ az aks get-credentials --resource-group rg-k8s-demo --name myAKSCluster
 | `EXTERNAL-IP` stuck on `<pending>` | Load balancer still provisioning | Wait a few minutes, then `kubectl get svc -w` |
 | Pipeline cannot find manifests | Path casing mismatch | Match `K8s/` exactly |
 | `kubectl` connects to wrong cluster | Stale context | `kubectl config use-context myAKSCluster` |
+| "Service connection could not be found" | Name mismatch or connection not created | Match the name in `azure-pipelines.yml` exactly |
 
 ---
 
